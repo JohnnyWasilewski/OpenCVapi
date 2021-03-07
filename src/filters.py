@@ -7,7 +7,6 @@ class Filters:
         self._kernel = kernel
 
     def apply(self, src):
-        a = 2
         return cv2.filter2D(src=src, ddepth=-1, kernel=self._kernel)
 
 
