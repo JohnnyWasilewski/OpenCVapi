@@ -4,10 +4,11 @@ from filters import BlurFilter, EdgeDetectionFilter
 from eventsHandler import EventsHandler
 import os
 
-class main():
+
+class Main:
     def __init__(self):
         self._windowManager = WindowManager('app',
-                                            self.listenKeybord)
+                                            self.listen_keyboard)
         self._captureManager = CaptureManager(cv2.VideoCapture(0),
                                               self._windowManager,
                                               True)
@@ -15,47 +16,47 @@ class main():
         self._blurFilterOn = False
         self._edgeDetectionFilterOn = False
         self._edgeDetectionFilter = EdgeDetectionFilter()
+        self._filtersTrigger = {
+            'edgeDetectionFilter': False,
+            'blurFilter': False,
+        }
         self._eventsHandler = EventsHandler(self._captureManager,
                                             self._windowManager,
                                             self._blurFilter,
-                                            self._edgeDetectionFilter)
+                                            self._edgeDetectionFilter,
+                                            self._filtersTrigger)
 
     def run(self):
-        self._windowManager.createWindow()
-        while self._windowManager.isWindowCreated:
-            self._captureManager.enterFrame()
+        self._windowManager.create_window()
+        while self._windowManager.is_window_created:
+            self._captureManager.enter_frame()
             frame = self._captureManager.frame
-#            self._captureManager.frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            self._captureManager.frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
-            self._windowManager.processEvents()
-#            self._eventsHandler().executeEvents()
-            if self._edgeDetectionFilterOn:
-                frame = self._captureManager.frame
-                self._captureManager.frame = self._edgeDetectionFilter.apply(src=frame)
-            if self._blurFilterOn:
-                a = self._captureManager.frame
-                self._captureManager.frame = self._blurFilter.apply(src=a)
+            self._windowManager.process_events()
+            self._eventsHandler.execute_events()
 
-            self._captureManager.exitFrame()
-            # TODO dadac rogi losia
-    def listenKeybord(self, keycode):
+            self._captureManager.exit_frame()
+
+    def listen_keyboard(self, keycode):
         if keycode == 32:
-            self._captureManager.writeImage('/home/johny/Documents/python3/screenshot.png')
+            self._captureManager.write_image('/home/johny/Documents/python3/screenshot.png')
         elif keycode == 9:
-            if not self._captureManager.isWritingVideo:
+            if not self._captureManager.is_writing_video:
                 print('start recording')
-                self._captureManager.startWritingVideo(os.path.join('/home/johny/Documents/python3/screencast.avi'))
+                self._captureManager.start_writing_video(os.path.join('/home/johny/Documents/python3/screencast.avi'))
             else:
-                self._captureManager.stopWritingVideo()
+                self._captureManager.stop_writing_video()
                 print('stop recording')
         elif keycode == 27:
-            self._windowManager.destroyWindow()
+            self._windowManager.destroy_window()
 
         elif keycode == ord('b'):  # blur filter
-            self._blurFilterOn = not self._blurFilterOn
+            self._filtersTrigger['blurFilter'] = not self._filtersTrigger['blurFilter']
 
-        elif keycode == ord('e'): # edge filter
-            self._edgeDetectionFilterOn = not self._edgeDetectionFilterOn
+        elif keycode == ord('e'):  # edge filter
+            self._filtersTrigger['edgeDetectionFilter'] = not self._filtersTrigger['edgeDetectionFilter']
+
 
 if __name__ == '__main__':
-    main().run()
+    Main().run()

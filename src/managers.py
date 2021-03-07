@@ -1,12 +1,12 @@
 import numpy as np
 import cv2
 import time
-import os
+
 
 class CaptureManager(object):
-    def __init__(self, capture, previewWindowManager = None, shouldMirrorPreview = False):
-        self.previewWindowManager = previewWindowManager
-        self.shouldMirrorPreview = shouldMirrorPreview
+    def __init__(self, capture, preview_window_manager=None, should_mirror_preview=False):
+        self.previewWindowManager = preview_window_manager
+        self.shouldMirrorPreview = should_mirror_preview
 
         self._capture = capture
         self._channel = 0
@@ -36,19 +36,19 @@ class CaptureManager(object):
         self._frame = value
 
     @property
-    def isWritingImage(self):
+    def is_writing_image(self):
         return self._imageFilename is not None
 
     @property
-    def isWritingVideo(self):
+    def is_writing_video(self):
         return self._videoFilename is not None
 
-    def enterFrame(self):
+    def enter_frame(self):
         assert not self._enteredFrame
         if self._capture is not None:
             self._enteredFrame = self._capture.grab()
 
-    def exitFrame(self):
+    def exit_frame(self):
         if self._frame is None:
             self._enteredFrame = False
             return
@@ -56,40 +56,40 @@ class CaptureManager(object):
         if self._framesElapsed == 0:
             self._startTime = time.time()
         else:
-            timeElapsed = time.time() - self._startTime
-            self._fpsEstimate = self._framesElapsed / timeElapsed
+            time_elapsed = time.time() - self._startTime
+            self._fpsEstimate = self._framesElapsed / time_elapsed
         self._framesElapsed += 1
 
         if self.previewWindowManager is not None:
             if self.shouldMirrorPreview:
-                mirroredFrame = np.fliplr(self._frame).copy()
-                self.previewWindowManager.show(mirroredFrame)
+                mirrored_frame = np.fliplr(self._frame).copy()
+                self.previewWindowManager.show(mirrored_frame)
             else:
                 self.previewWindowManager.show(self._frame)
 
-        if self.isWritingImage:
+        if self.is_writing_image:
             cv2.imwrite(self._imageFilename, self._frame)
             self._imageFilename = None
 
-        self._writeVideoFrame()
+        self._write_video_frame()
 
         self._frame = None
         self._enteredFrame = False
 
-    def writeImage(self, filename):
+    def write_image(self, filename):
         self._imageFilename = filename
 
-    def startWritingVideo(self, filename, encoding = cv2.VideoWriter_fourcc('I', '4', '2', '0')):
+    def start_writing_video(self, filename, encoding=cv2.VideoWriter_fourcc('I', '4', '2', '0')):
         self._videoFilename = filename
         self._videoEncoding = encoding
 
-    def stopWritingVideo(self):
+    def stop_writing_video(self):
         self._videoFilename = None
         self._videoEncoding = None
         self._videoWriter = None
 
-    def _writeVideoFrame(self):
-        if not self.isWritingVideo:
+    def _write_video_frame(self):
+        if not self.is_writing_video:
             return
 
         if self._videoWriter is None:
@@ -107,27 +107,27 @@ class CaptureManager(object):
 
 
 class WindowManager:
-    def __init__(self, windowName, keypressCallback = None):
-        self.keypressCallback = keypressCallback
-        self._windowName = windowName
+    def __init__(self, window_name, keypress_callback=None):
+        self.keypressCallback = keypress_callback
+        self._windowName = window_name
         self._isWindowCreated = False
 
     @property
-    def isWindowCreated(self):
+    def is_window_created(self):
         return self._isWindowCreated
 
-    def createWindow(self):
+    def create_window(self):
         cv2.namedWindow(self._windowName)
         self._isWindowCreated = True
 
     def show(self, frame):
         cv2.imshow(self._windowName, frame)
 
-    def destroyWindow(self):
+    def destroy_window(self):
         cv2.destroyWindow(self._windowName)
         self._isWindowCreated = False
 
-    def processEvents(self):
+    def process_events(self):
         keycode = cv2.waitKey(1)
         if self.keypressCallback is not None and keycode != -1:
             keycode &= 0xFF
