@@ -4,6 +4,7 @@ from filters import BlurFilter, EdgeDetectionFilter
 from eventsHandler import EventsHandler
 from faceDetector import detect_face
 import os
+from prepareImg import get_face_recognition_model
 
 
 class Main:
@@ -29,11 +30,13 @@ class Main:
 
     def run(self):
         self._windowManager.create_window()
+        model = get_face_recognition_model()
         while self._windowManager.is_window_created:
             self._captureManager.enter_frame()
             frame = self._captureManager.frame
             #self._captureManager.frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-            frame = detect_face(frame)
+            frame = detect_face(frame, model)
+
             self._windowManager.process_events()
             self._eventsHandler.execute_events()
 
