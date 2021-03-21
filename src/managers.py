@@ -127,8 +127,3 @@ class WindowManager:
         cv2.destroyWindow(self._windowName)
         self._isWindowCreated = False
 
-    def process_events(self):
-        keycode = cv2.waitKey(1)
-        if self.keypressCallback is not None and keycode != -1:
-            keycode &= 0xFF
-            self.keypressCallback(keycode)
