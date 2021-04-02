@@ -1,6 +1,8 @@
 from filters import BlurFilter, EdgeDetectionFilter
 from faceDetector import detect_face, get_face_recognition_model
+from backgroundProcessing import BackgroundProcessing
 import cv2
+import os
 
 
 class EventsHandler:
@@ -11,10 +13,12 @@ class EventsHandler:
             'edgeDetectionFilter': False,
             'blurFilter': False,
             'detectFace': False,
+            'background': False,
         }
         self._face_model = get_face_recognition_model()
         self._blurFilter = BlurFilter()
         self._edgeDetectionFilter = EdgeDetectionFilter()
+        self._backgroundProcessing = BackgroundProcessing()
 
     def process_events(self):
         self._get_events()
@@ -23,11 +27,13 @@ class EventsHandler:
     def _execute_events(self):
         frame = self._captureManager.frame
         if self._eventsTrigger['edgeDetectionFilter']:
-            self._captureManager.frame = self._edgeDetectionFilter.apply(src=frame)
+            frame = self._edgeDetectionFilter.apply(src=frame)
         if self._eventsTrigger['blurFilter']:
-            self._captureManager.frame = self._blurFilter.apply(src=frame)
+            frame = self._blurFilter.apply(src=frame)
         if self._eventsTrigger['detectFace']:
-            self._captureManager.frame = detect_face(frame=frame, model=self._face_model)
+            frame = detect_face(frame=frame, model=self._face_model)
+        if self._eventsTrigger['background']:
+            frame = self._backgroundProcessing.apply_knn(frame)
 
     def _get_events(self):
         keycode = cv2.waitKey(1)
@@ -56,3 +62,6 @@ class EventsHandler:
 
         elif keycode == ord('4'):
             self._eventsTrigger['detectFace'] = not self._eventsTrigger['detectFace']
+
+        elif keycode == ord('5'):
+            self._eventsTrigger['background'] = not self._eventsTrigger['background']
