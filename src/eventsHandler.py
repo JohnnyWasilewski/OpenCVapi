@@ -33,7 +33,7 @@ class EventsHandler:
         if self._eventsTrigger['detectFace']:
             frame = detect_face(frame=frame, model=self._face_model)
         if self._eventsTrigger['background']:
-            frame = self._backgroundProcessing.apply_knn(frame)
+            frame = self._backgroundProcessing.apply_background_detector(frame)
 
     def _get_events(self):
         keycode = cv2.waitKey(1)
@@ -54,10 +54,10 @@ class EventsHandler:
         elif keycode == 27:
             self._windowManager.destroy_window()
 
-        elif keycode == ord('1'):  # blur filter
+        elif keycode == ord('1'):
             self._eventsTrigger['blurFilter'] = not self._eventsTrigger['blurFilter']
 
-        elif keycode == ord('2'):  # edge filter
+        elif keycode == ord('2'):
             self._eventsTrigger['edgeDetectionFilter'] = not self._eventsTrigger['edgeDetectionFilter']
 
         elif keycode == ord('4'):
@@ -65,3 +65,5 @@ class EventsHandler:
 
         elif keycode == ord('5'):
             self._eventsTrigger['background'] = not self._eventsTrigger['background']
+            if not self._eventsTrigger['background']:
+                cv2.destroyWindow("background")
